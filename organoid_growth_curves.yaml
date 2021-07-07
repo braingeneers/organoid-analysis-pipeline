@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: julians-organoids
+spec:
+  backoffLimit: 0
+  completions: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: julians-organoids
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: julians-organoids
+        image: jmlehrer/organoids:latest
+        command: ["stdbuf", "-i0", "-o0", "-e0", "bash", "-c"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        args: ["python pipeline/download.py && python pipeline/growth_curves.py"]
+        resources:
+          limits:
+            memory: 50Gi
+            cpu: "10"
+          requests:
+            memory: 0.25Gi
+            cpu: "2"
+        volumeMounts:
+        - name: ephemeral
+          mountPath: "/pipeline/data"
+      volumes:
+      # Ephemeral storage
+      - name: ephemeral
+        emptyDir: {}

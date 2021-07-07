@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: julians-organoids-test
+spec:
+  backoffLimit: 0
+  completions: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: julians-organoids-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: julians-organoids
+        image: jmlehrer/organoids:latest
+        command: ["stdbuf", "-i0", "-o0", "-e0", "bash", "-c"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        args: ["cd pipeline/; ./run && sleep 10000"]
+        resources:
+          limits:
+            memory: 50Gi
+            cpu: "10"
+          requests:
+            memory: 0.25Gi
+            cpu: "2"
+        volumeMounts:
+        - name: ephemeral
+          mountPath: "/pipeline/data"
+      volumes:
+      # Ephemeral storage
+      - name: ephemeral
+        emptyDir: {}

@@ -1,0 +1,6 @@
+.DS_Store
+.ipynb_checkpoints
+data/*
+*.pyc
+credentials
+pipeline/run
